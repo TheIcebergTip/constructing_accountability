@@ -17,7 +17,7 @@ Across all files the names of the beneficiaries were split across columns ```Sur
 
 ## 🧼Normalization & Standarization
 
-- ### Annual files:
+- Annual files:
 Manually added the columns ```SEX, AGE, and REGISTRATION DATE ``` as empty values to match the structure of the later datasets.
 
 - ### Monthly files:
