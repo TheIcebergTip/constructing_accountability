@@ -27,12 +27,15 @@ Ensured consistency of the colum names across all files and were standarized:
 ---
 ### Name and State standarization
 
-Columns were concatenated into a single ```NAME```column
+To clean and simplify structure the names were merged into a single ```NAME```column, which kept the full name in a single cell:
 ```python
-df['NOMBRE'] = df['NOMBRE'] + ' ' + df['PRIMER APELLIDO'] + ' ' + df['SEGUNDO APELLIDO']
-```
+def generate_full_name(row):
+    return f"{row['NOMBRE']} {row['PRIMER APELLIDO']} {row['SEGUNDO APELLIDO']}"
+df['NOMBRE'] = df.apply(generate_full_name, axis=1)
 
-The same was done with the State code using a dictionary.
+```
+As for the states, instead of keeping the numeric codes, a dictionary was used to map each one to the corresponding name:
+
 ```python
 state_mapping = {
     '01': 'Aguascalientes', '02': 'Baja California', '03': 'Baja California Sur', '04': 'Campeche',
@@ -45,14 +48,31 @@ state_mapping = {
 }
 ```
 
-The final column across all files were standarized as:
+The final columns across all files were standarized as:
 ```NUM, CVE_ENTIDAD, CVE_MUN, PRIMER APELLIDO, SEGUNDO APELLIDO, NOMBRE, SEXO, EDAD, FECHA_ALTA, IMPORTE_BENEFICIO```
 
 ### UID Creation & De-duplication
 
-To handle beneficiaries and identifying the as unique, a ``UID`` column was created based on State and Municipality location along with the name of each one:
-``UID = NOMBRE + "_" + CVE_ENTIDAD + "_" + CVE_MUNICIPIO``
+To handle beneficiaries as unique individuals based on basic attributes, a simple concatenated string was used:
+
+``python
+UID = NOMBRE + "_" + CVE_ENTIDAD + "_" + CVE_MUNICIPIO
+``
+
+To make identifiers cleaner and consistent across dozens of large files, a ``hashed_UID`` was created using the SHA-256 algorithm (this version wasn't used given editorial decisions):
+``python
+def generate__hashed_uid(row):
+    nombre = str(row.get('NOMBRE', '')).strip().upper()
+    entidad = str(row.get('CVE_ENTIDAD', 'UNKNOWN')).zfill(2)
+    municipio = str(row.get('CVE_MUNICIPIO', 'UNKNOWN')).zfill(3)
+    uid_str = f"{nombre}_{entidad}_{municipio}"
+    return hashlib.sha256(uid_str.encode()).hexdigest()
+``
 
 ## 📜Scripts
+1. ./mapping_states✅✅✅
+2. ./summarize_by_year✅✅✅
+3. ./concat_uid_jcf✅✅
+4. ./hashed_uid_jcf✅✅✅
+5. ./jcf_data_wrangler_deluxe✅
 
-## 
