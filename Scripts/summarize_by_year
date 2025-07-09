@@ -1,0 +1,63 @@
+import pandas as pd
+import os
+from glob import glob
+
+# Folder with input files
+input_dir = "."
+output_dir = "./summarized_by_year"
+os.makedirs(output_dir, exist_ok=True)
+
+# To extract year from filename
+def extract_year(filename):
+    for yr in ["2019", "2020", "2021", "2022", "2023", "2024"]:
+        if yr in filename:
+            return yr
+    return "unknown"
+
+# Find all .xlsx files in the folder using globe instead of os.listdir
+all_files = glob(os.path.join(input_dir, "*.xlsx"))
+
+# Group files by year
+files_by_year = {}
+for file_path in all_files:
+    filename = os.path.basename(file_path).replace(".xlsx", "")
+    year = extract_year(filename)
+    files_by_year.setdefault(year, []).append((filename, file_path))
+
+# Process each year as a group
+for year, files in files_by_year.items():
+    summary_rows = []
+    for filename, path in files:
+        try:
+            df = pd.read_excel(path)
+            row_count = len(df)
+            importe_sum = df["IMPORTE_BENEFICIO"].sum()
+
+            # Count gender ONLY if usable data exists, cases like 2019 and 2020 will skip it
+            if "SEXO" in df.columns and df["SEXO"].notna().any():
+                sexos = df["SEXO"].astype(str).str.upper()
+                masculino_count = (sexos == "MASCULINO").sum()
+                femenino_count = (sexos == "FEMENINO").sum()
+            else:
+                masculino_count = None
+                femenino_count = None
+
+            summary_rows.append({
+                "Filename": filename,
+                "Total Rows": row_count,
+                "Total Importe Beneficio": int(importe_sum),
+                "Total Masculino": masculino_count,
+                "Total Femenino": femenino_count
+            })
+        except Exception as e:
+            print(f"⚠️ Error processing {filename}: {e}")
+
+    summary_df = pd.DataFrame(summary_rows)
+    summary_df = summary_df.sort_values(by="Filename")  # ✅ Sort by filename
+    output_file = os.path.join(output_dir, f"summary_{year}.xlsx")
+    summary_df.to_excel(output_file, index=False)
+
+# Print processed count
+print(f"✅ Processed {len(all_files)} summaries written to: {output_dir}")
+
+
