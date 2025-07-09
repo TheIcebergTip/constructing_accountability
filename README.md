@@ -96,6 +96,6 @@ def generate__hashed_uid(row):
 3. [concat_uid_jcf](./Scripts/concat_uid_jcf)
    - Processes all files to generate a unique identifier (UID) per row using a combination of `NOMBRE`, `CVE_ENTIDAD`, and `CVE_MUNICIPIO`. 
 4. [hashed_uid_jcf](./Scripts/hashed_uid_jcf)
-   - Similar to `concat_uid_generator.py`, but creates a **SHA-256 hashed UID** per row from `NOMBRE`, `CVE_ENTIDAD`, and `CVE_MUNICIPIO` values. Useful for anonymization or deduplication. 
+   - Similar to `concat_uid_jcf`, but creates a **SHA-256 hashed UID** per row from `NOMBRE`, `CVE_ENTIDAD`, and `CVE_MUNICIPIO` values. Useful for anonymization or deduplication. 
 5. [jcf_data_wrangler](./Scripts/jcf_data_wrangler)
     - Comprehensive summarizer that processes all files and generates different summaries. Counts beneficiaries, breaks them down by gender, and totals the benefits paid. Also logs errors in a separate file if key columns are missing.
