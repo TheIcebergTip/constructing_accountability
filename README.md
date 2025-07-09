@@ -6,6 +6,7 @@ Data obtain from [Padrón Único de Beneficiarios del Programa Jóvenes COnstruy
 
 35 ```.xlsx``` files were downloaded:
 - 2019-2020:  Annual files, each year split in two ```.xlsx``` files due to the amount of data
+
 These files lacked information about the ```SEX, AGE, and REGISTRATION DATE ```
 
 - 2021:       One file for the full year
