@@ -1,8 +1,8 @@
 # constructing_accountability
-This repo contains the scripts used to clean, analyse, and process data from the Mexican federal program Youth Building the Future. The scripts were used for the story ['El doble blindaje de Jóvenes Construyendo el Futuro'](https://www.meganoticias.mx/cdmx/noticia/el-doble-blindaje-de-jovenes-construyendo-el-futuro/589146) [spanish only] published by the Mexican outlet Meganoticias. 
+This repo contains the scripts used to clean, analyse, and process data from the Mexican federal program Youth Building the Future (Jóvenes Construyendo el Futuro, its spanish name). The scripts were used for the story ['El doble blindaje de Jóvenes Construyendo el Futuro'](https://www.meganoticias.mx/cdmx/noticia/el-doble-blindaje-de-jovenes-construyendo-el-futuro/589146) [spanish only] published by the Mexican outlet Meganoticias. 
 
 ## 🗂️Data Source & Original Structure
-Data obtain from [Padrón Único de Beneficiarios del Programa Jóvenes COnstruyendo el Futuro](https://pub.bienestar.gob.mx/v2/pub/programasIntegrales/9/5928)
+Data obtain from [Padrón Único de Beneficiarios del Programa Jóvenes Construyendo el Futuro](https://pub.bienestar.gob.mx/v2/pub/programasIntegrales/9/5928)
 
 35 ```.xlsx``` files were downloaded:
 - 2019-2020:  Annual files, each year split in two ```.xlsx``` files due to the amount of data
@@ -13,19 +13,35 @@ These files lacked information about the ```SEX, AGE, and REGISTRATION DATE ```
 
 - 2022-2023:  Monthly files 
 
-Across all files the names of the beneficiaries were splited across columns ```Surname, Second Surname, Name``` and states were coded under ```CVE_ENTIDAD```
+Across all files the names of the beneficiaries were split across columns ```Surname, Second Surname, Name``` and states were coded under ```CVE_ENTIDAD```
 
 ## 🧼Normalization & Standarization
 
 ### Annual files:
-Manually addded the columns ```SEX, AGE, and REGISTRATION DATE ``` as empty values to match the structure of the later datasets.
+Manually added the columns ```SEX, AGE, and REGISTRATION DATE ``` as empty values to match the structure of the later datasets.
 
 ### Monthly files:
-Ensured consistency of the colum names across all files and were standarized:
+Ensured consistency of the column names across all files and were standarized:
 ```NUM, CVE_ENTIDAD, CVE_MUN, PRIMER APELLIDO, SEGUNDO APELLIDO, NOMBRE, SEXO, EDAD, FECHA_ALTA, IMPORTE_BENEFICIO```
 
+### Normalization
+
+Two different methods were used according to the script requirements and knowledge at the time:
+
+```python
+if "SEXO" in df.columns and df["SEXO"].notna().any():
+    sexos = df["SEXO"].astype(str).str.upper()
+```
+
+```python
+if "SEXO" in df.columns:
+    df["SEXO"] = df["SEXO"].astype(str).str.upper().str.strip()
+else:
+    df["SEXO"] = None
+```
+
 ---
-### Name and State standarization
+### Name and State Standardization
 
 To clean and simplify structure the names were merged into a single ```NAME```column, which kept the full name in a single cell:
 ```python
@@ -71,8 +87,13 @@ def generate__hashed_uid(row):
 
 ## 📜Scripts
 1. [mapping_states](./Scripts/mapping_states)
-2. [summarize_by_year](./Scripts/concat_uid_jcf)
-3. [concat_uid_jcf](./Scripts/summarize_by_year)
-4. [hashed_uid_jcf](./Scripts/hashed_uid_jcf)
-5. [jcf_data_wrangler](./Scripts/jcf_data_wrangler)
+    - Replaces numeric state codes (`CVE_ENTIDAD`) with readable state names (e.g., `15` → `México`). Outputs the cleaned files into a `/mapped_states` folder for downstream use.
+2. [summarize_by_year](./Scripts/summarize_by_year)
+   - Groups files by year (based on filenames), calculates the total number of records, total benefit amounts (`IMPORTE_BENEFICIO`), and—if available—counts of male and female beneficiaries (`SEXO`). 
 
+3. [concat_uid_jcf](./Scripts/concat_uid_jcf)
+   - Processes all files to generate a unique identifier (UID) per row using a combination of `NOMBRE`, `CVE_ENTIDAD`, and `CVE_MUNICIPIO`. 
+4. [hashed_uid_jcf](./Scripts/hashed_uid_jcf)
+   - Similar to `concat_uid_generator.py`, but creates a **SHA-256 hashed UID** per row from `NOMBRE`, `CVE_ENTIDAD`, and `CVE_MUNICIPIO` values. Useful for anonymization or deduplication. 
+5. [jcf_data_wrangler](./Scripts/jcf_data_wrangler)
+    - Comprehensive summarizer that processes all files and generates different summaries. Counts beneficiaries, breaks them down by gender, and totals the benefits paid. Also logs errors in a separate file if key columns are missing.
