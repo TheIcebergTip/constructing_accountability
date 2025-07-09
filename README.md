@@ -67,7 +67,7 @@ state_mapping = {
 The final columns across all files were standarized as:
 ```NUM, CVE_ENTIDAD, CVE_MUN, PRIMER APELLIDO, SEGUNDO APELLIDO, NOMBRE, SEXO, EDAD, FECHA_ALTA, IMPORTE_BENEFICIO```
 
-### UID Creation & De-duplication
+### 🧬UID Creation & De-duplication
 
 To handle beneficiaries as unique individuals based on basic attributes, a simple concatenated string was used:
 
