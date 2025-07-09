@@ -1,0 +1,46 @@
+import pandas as pd
+import os
+
+# State mapping dictionary
+state_mapping = {
+    '01': 'Aguascalientes', '02': 'Baja California', '03': 'Baja California Sur', '04': 'Campeche',
+    '05': 'Coahuila', '06': 'Colima', '07': 'Chiapas', '08': 'Chihuahua', '09': 'Ciudad de México',
+    '10': 'Durango', '11': 'Guanajuato', '12': 'Guerrero', '13': 'Hidalgo', '14': 'Jalisco',
+    '15': 'México', '16': 'Michoacán', '17': 'Morelos', '18': 'Nayarit', '19': 'Nuevo León',
+    '20': 'Oaxaca', '21': 'Puebla', '22': 'Querétaro', '23': 'Quintana Roo', '24': 'San Luis Potosí',
+    '25': 'Sinaloa', '26': 'Sonora', '27': 'Tabasco', '28': 'Tamaulipas', '29': 'Tlaxcala',
+    '30': 'Veracruz', '31': 'Yucatán', '32': 'Zacatecas'
+}
+
+# Directory
+input_dir = "."
+output_dir = "./mapped_states"
+os.makedirs(output_dir, exist_ok=True)
+
+#  Mapping function for CVE_ENTIDAD
+def map_state_code(val):
+    try:
+        return state_mapping.get(str(int(val)).zfill(2), 'Unspecified')
+    except:
+        return 'Unspecified'
+
+# Process all .xlsx files in input_dir
+xlsx_files = [f for f in os.listdir(input_dir) if f.endswith(".xlsx")]
+processed_count = 0
+
+for file_name in xlsx_files:
+    file_path = os.path.join(input_dir, file_name)
+    try:
+        df = pd.read_excel(file_path)
+
+        if 'CVE_ENTIDAD' in df.columns:
+            df['CVE_ENTIDAD'] = df['CVE_ENTIDAD'].apply(map_state_code)
+
+        output_path = os.path.join(output_dir, f"mapped_states_{file_name}")
+        df.to_excel(output_path, index=False)
+        processed_count += 1
+    except Exception as e:
+        print(f"❌ Error processing {file_name}: {e}")
+
+# Print processed count
+print(f"✅ Processed {processed_count} files with mapped state names.")
