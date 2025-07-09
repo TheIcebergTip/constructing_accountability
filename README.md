@@ -70,9 +70,9 @@ def generate__hashed_uid(row):
 ``
 
 ## 📜Scripts
-1. [mapping_states](./https://github.com/TheIcebergTip/constructing_accountability/blob/main/Scripts/mapping_states)
-2. [summarize_by_year](./https://github.com/TheIcebergTip/constructing_accountability/blob/main/Scripts/concat_uid_jcf)
-3. [concat_uid_jcf](./https://github.com/TheIcebergTip/constructing_accountability/blob/main/Scripts/summarize_by_year)
-4. [hashed_uid_jcf](./https://github.com/TheIcebergTip/constructing_accountability/blob/main/Scripts/hashed_uid_jcf)
-5. [jcf_data_wrangler_deluxe](./https://github.com/TheIcebergTip/constructing_accountability/blob/main/Scripts/jcf_data_wrangler)
+1. [mapping_states](./Scripts/mapping_states)
+2. [summarize_by_year](./Scripts/concat_uid_jcf)
+3. [concat_uid_jcf](./Scripts/summarize_by_year)
+4. [hashed_uid_jcf](./Scripts/hashed_uid_jcf)
+5. [jcf_data_wrangler](./Scripts/jcf_data_wrangler)
 
