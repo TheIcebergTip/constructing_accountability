@@ -5,7 +5,7 @@ This repo contains the scripts used to clean, analyse, and process data from the
 Data obtain from [Padrón Único de Beneficiarios del Programa Jóvenes COnstruyendo el Futuro](https://pub.bienestar.gob.mx/v2/pub/programasIntegrales/9/5928)
 
 35 ```.xlsx``` files were downloaded:
-- 2019-2020:  Annual files, each year split in to ```.xlsx``` files due to the amount of data
+- 2019-2020:  Annual files, each year split in two ```.xlsx``` files due to the amount of data
 These files lacked information about the ```SEX, AGE, and REGISTRATION DATE ```
 
 - 2021:       One file for the full year
