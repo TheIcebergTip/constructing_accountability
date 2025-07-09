@@ -1,0 +1,130 @@
+
+import pandas as pd
+import os
+from glob import glob
+import re
+
+# Folder setup
+input_dir = "."
+output_file = "JCF_master_summary.xlsx"
+error_log_file = "errors_found.xlsx"
+
+# Helper to extract year from filename
+def extract_year(filename):
+    match = re.search(r"(20\d{2})", filename)
+    return match.group(1) if match else "unknown"
+
+# Find all mapped_states_*.xlsx files
+all_files = glob(os.path.join(input_dir, "*.xlsx"))
+
+# Initialize structures
+year_data = {}
+state_data = {}
+year_state_data = {}
+total_summary = {
+    "Total Beneficiaries": 0,
+    "Total Masculino": 0,
+    "Total Femenino": 0,
+    "Total Importe Beneficio": 0
+}
+error_rows = []
+
+# Process each file
+for file_path in all_files:
+    filename = os.path.basename(file_path)
+    year = extract_year(filename)
+
+    try:
+        df = pd.read_excel(file_path)
+
+        # Error log if missing required columns
+        if not {"NOMBRE", "IMPORTE_BENEFICIO"}.issubset(df.columns):
+            error_rows.append({"File": filename, "Issue": "Missing NOMBRE or IMPORTE_BENEFICIO column"})
+            continue
+
+        # Normalize SEXO
+        if "SEXO" in df.columns:
+            df["SEXO"] = df["SEXO"].astype(str).str.upper().str.strip()
+        else:
+            df["SEXO"] = None
+            error_rows.append({"File": filename, "Issue": "Missing SEXO column"})
+
+        # Normalize CVE_ENTIDAD
+        if "CVE_ENTIDAD" not in df.columns:
+            df["CVE_ENTIDAD"] = None
+            error_rows.append({"File": filename, "Issue": "Missing CVE_ENTIDAD column"})
+
+        # General summary
+        total_summary["Total Beneficiaries"] += len(df)
+        total_summary["Total Masculino"] += (df["SEXO"] == "MASCULINO").sum()
+        total_summary["Total Femenino"] += (df["SEXO"] == "FEMENINO").sum()
+        total_summary["Total Importe Beneficio"] += df["IMPORTE_BENEFICIO"].sum()
+
+        # Year summary
+        if year not in year_data:
+            year_data[year] = {"Beneficiaries": 0, "MASCULINO": 0, "FEMENINO": 0, "IMPORTE_BENEFICIO": 0}
+        year_data[year]["Beneficiaries"] += len(df)
+        year_data[year]["MASCULINO"] += (df["SEXO"] == "MASCULINO").sum()
+        year_data[year]["FEMENINO"] += (df["SEXO"] == "FEMENINO").sum()
+        year_data[year]["IMPORTE_BENEFICIO"] += df["IMPORTE_BENEFICIO"].sum()
+
+        # State summary
+        for state, group in df.groupby("CVE_ENTIDAD"):
+            if state not in state_data:
+                state_data[state] = {
+                    "Beneficiaries": 0,
+                    "IMPORTE_BENEFICIO": 0,
+                    "MASCULINO": 0,
+                    "FEMENINO": 0
+                }
+            state_data[state]["Beneficiaries"] += len(group)
+            state_data[state]["IMPORTE_BENEFICIO"] += group["IMPORTE_BENEFICIO"].sum()
+            state_data[state]["MASCULINO"] += (group["SEXO"] == "MASCULINO").sum()
+            state_data[state]["FEMENINO"] += (group["SEXO"] == "FEMENINO").sum()
+
+        # Year-State summary
+        year_state_group = df.groupby("CVE_ENTIDAD")["IMPORTE_BENEFICIO"].agg(["count", "sum"]).reset_index()
+        for _, row in year_state_group.iterrows():
+            key = (year, row["CVE_ENTIDAD"])
+            if key not in year_state_data:
+                year_state_data[key] = {"Beneficiaries": 0, "IMPORTE_BENEFICIO": 0}
+            year_state_data[key]["Beneficiaries"] += int(row["count"])
+            year_state_data[key]["IMPORTE_BENEFICIO"] += row["sum"]
+
+    except Exception as e:
+        error_rows.append({"File": filename, "Issue": str(e)})
+
+# Build output DataFrames
+df_general = pd.DataFrame([total_summary])
+
+df_year = pd.DataFrame([
+    {"AÑO": yr, "Beneficiarios": vals["Beneficiaries"], "MASCULINO": vals["MASCULINO"],
+     "FEMENINO": vals["FEMENINO"], "IMPORTE_BENEFICIO": vals["IMPORTE_BENEFICIO"]}
+    for yr, vals in year_data.items()
+])
+
+df_state = pd.DataFrame([
+    {"CVE_ENTIDAD": state, "Beneficiarios": vals["Beneficiaries"], "IMPORTE_BENEFICIO": vals["IMPORTE_BENEFICIO"],
+     "MASCULINO": vals["MASCULINO"], "FEMENINO": vals["FEMENINO"]}
+    for state, vals in state_data.items()
+])
+
+df_year_state = pd.DataFrame([
+    {"AÑO": yr, "CVE_ENTIDAD": st, "Beneficiarios": vals["Beneficiaries"], "IMPORTE_BENEFICIO": vals["IMPORTE_BENEFICIO"]}
+    for (yr, st), vals in year_state_data.items()
+])
+
+# Save to Excel
+with pd.ExcelWriter(output_file) as writer:
+    df_general.to_excel(writer, sheet_name="general_summary", index=False)
+    df_year.to_excel(writer, sheet_name="summary_by_year", index=False)
+    df_state.to_excel(writer, sheet_name="summary_by_state", index=False)
+    df_year_state.to_excel(writer, sheet_name="summary_by_year_and_state", index=False)
+
+# Save error report
+if error_rows:
+    df_errors = pd.DataFrame(error_rows)
+    df_errors.to_excel(error_log_file, index=False)
+
+# Print processed count
+print(f"✅ Processed {len(all_files)} files from folder: {input_dir}")
