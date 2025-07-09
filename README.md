@@ -1,5 +1,5 @@
 # constructing_accountability
-This repo contains the scripts used to clean, analyse, and process data from the Mexican federal program Youth Building the Future. The scripts were used for the story 'El doble blindaje de Jóvenes Construyendo el Futuro' [spanish only] published by the Mexican outlet Meganoticias. 
+This repo contains the scripts used to clean, analyse, and process data from the Mexican federal program Youth Building the Future. The scripts were used for the story ['El doble blindaje de Jóvenes Construyendo el Futuro'](https://www.meganoticias.mx/cdmx/noticia/el-doble-blindaje-de-jovenes-construyendo-el-futuro/589146) [spanish only] published by the Mexican outlet Meganoticias. 
 
 ## 🗂️Data Source & Original Structure
 Data obtain from [Padrón Único de Beneficiarios del Programa Jóvenes COnstruyendo el Futuro](https://pub.bienestar.gob.mx/v2/pub/programasIntegrales/9/5928)
