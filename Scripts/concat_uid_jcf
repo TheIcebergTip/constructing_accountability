@@ -1,0 +1,40 @@
+import pandas as pd
+import os
+from glob import glob
+
+# Create output directory
+output_dir = "concat_uid"
+os.makedirs(output_dir, exist_ok=True)
+
+# Directories/find all Excel files that match mapped_states_*.xlsx
+all_files = glob(os.path.join(".", "mapped_states_*.xlsx"))
+
+# Simple UID
+def generate_simple_uid(row):
+    return f"{row['NOMBRE']}_{row['CVE_ENTIDAD']}_{row['CVE_MUNICIPIO']}"
+
+processed_count = 0
+
+# Process each file
+for file_path in all_files:
+    try:
+        df = pd.read_excel(file_path)
+
+        # Create UID if all required columns exist
+        if all(col in df.columns for col in ['NOMBRE', 'CVE_ENTIDAD', 'CVE_MUNICIPIO']):
+            df['UID'] = df.apply(generate_simple_uid, axis=1)
+
+            # Build output file name
+            clean_name = os.path.basename(file_path).replace("mapped_states_", "")
+            output_filename = f"uid_mapped_{clean_name}"
+            output_path = os.path.join(output_dir, output_filename)
+
+            df.to_excel(output_path, index=False)
+            processed_count += 1
+        else:
+            print(f"⚠️ Skipping {file_path} due to missing required columns.")
+    except Exception as e:
+        print(f"❌ Error processing {file_path}: {e}")
+
+# Print processed count
+print(f"✅ Processed {processed_count} files. Concat_UID written in: {output_dir}")
