@@ -1,0 +1,46 @@
+
+import pandas as pd
+import hashlib
+import os
+from glob import glob
+
+def generate_uid(row):
+    nombre = str(row.get('NOMBRE', '')).strip().upper()
+    entidad = str(row.get('CVE_ENTIDAD', 'UNKNOWN')).zfill(2)
+    municipio = str(row.get('CVE_MUNICIPIO', 'UNKNOWN')).zfill(3)
+    uid_str = f"{nombre}_{entidad}_{municipio}"
+    return hashlib.sha256(uid_str.encode()).hexdigest()
+
+# Folder with mapped Excel files
+input_dir = "."
+output_dir = "hashed_uid"
+os.makedirs(output_dir, exist_ok=True)
+
+all_files = glob(os.path.join(input_dir, "mapped_states_*.xlsx"))
+
+processed_count = 0
+
+for file in all_files:
+    try:
+        df = pd.read_excel(file)
+        if {"NOMBRE", "CVE_ENTIDAD", "CVE_MUNICIPIO"}.issubset(df.columns):
+            df['UID'] = df.apply(generate_uid, axis=1)
+
+ #  Build clean output filename 
+            clean_name = os.path.basename(file).replace("mapped_states_", "")
+            output_filename = f"hashed_uid_{clean_name}"
+            output_path = os.path.join(output_dir, output_filename)
+
+            df.to_excel(output_path, index=False)
+            processed_count += 1
+        else:
+            print(f"⚠️ Skipping {file} due to missing required columns.")
+            continue
+
+    except Exception as e:
+        print(f"❌ Error processing {file}: {e}")
+
+# Print processed count
+print(f"✅ Processed {processed_count} UID files written to: {output_dir}")
+
+
