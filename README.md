@@ -17,14 +17,14 @@ Across all files the names of the beneficiaries were split across columns ```Sur
 
 ## 🧼Normalization & Standarization
 
-- Annual files:
+- #### Annual files:
 Manually added the columns ```SEX, AGE, and REGISTRATION DATE ``` as empty values to match the structure of the later datasets.
 
-- ### Monthly files:
+- #### Monthly files:
 Ensured consistency of the column names across all files and were standarized:
 ```NUM, CVE_ENTIDAD, CVE_MUN, PRIMER APELLIDO, SEGUNDO APELLIDO, NOMBRE, SEXO, EDAD, FECHA_ALTA, IMPORTE_BENEFICIO```
 
-- ### Normalization
+- #### Normalization
 
 Two different methods were used according to the script requirements and knowledge at the time:
 
@@ -40,7 +40,7 @@ else:
     df["SEXO"] = None
 ```
 
-- ### Name and State Standardization
+- #### Name and State Standardization
 
 To clean and simplify structure the names were merged into a single ```NAME```column, which kept the full name in a single cell:
 
@@ -67,7 +67,7 @@ state_mapping = {
 The final columns across all files were standarized as:
 ```NUM, CVE_ENTIDAD, CVE_MUN, PRIMER APELLIDO, SEGUNDO APELLIDO, NOMBRE, SEXO, EDAD, FECHA_ALTA, IMPORTE_BENEFICIO```
 
-### 🧬UID Creation & De-duplication
+## 🧬UID Creation & De-duplication
 
 To handle beneficiaries as unique individuals based on basic attributes, a simple concatenated string was used:
 
