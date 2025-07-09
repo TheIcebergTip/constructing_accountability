@@ -40,19 +40,19 @@ else:
     df["SEXO"] = None
 ```
 
----
 - ### Name and State Standardization
 
 To clean and simplify structure the names were merged into a single ```NAME```column, which kept the full name in a single cell:
-```python
+
+``python
 def generate_full_name(row):
     return f"{row['NOMBRE']} {row['PRIMER APELLIDO']} {row['SEGUNDO APELLIDO']}"
 df['NOMBRE'] = df.apply(generate_full_name, axis=1)
+``
 
-```
 As for the states, instead of keeping the numeric codes, a dictionary was used to map each one to the corresponding name:
 
-```python
+``python
 state_mapping = {
     '01': 'Aguascalientes', '02': 'Baja California', '03': 'Baja California Sur', '04': 'Campeche',
     '05': 'Coahuila', '06': 'Colima', '07': 'Chiapas', '08': 'Chihuahua', '09': 'Ciudad de México',
@@ -62,7 +62,7 @@ state_mapping = {
     '25': 'Sinaloa', '26': 'Sonora', '27': 'Tabasco', '28': 'Tamaulipas', '29': 'Tlaxcala',
     '30': 'Veracruz', '31': 'Yucatán', '32': 'Zacatecas'
 }
-```
+``
 
 The final columns across all files were standarized as:
 ```NUM, CVE_ENTIDAD, CVE_MUN, PRIMER APELLIDO, SEGUNDO APELLIDO, NOMBRE, SEXO, EDAD, FECHA_ALTA, IMPORTE_BENEFICIO```
